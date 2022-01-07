@@ -1,22 +1,12 @@
 #!/bin/bash -eu
 
-SSH_USER=${SSH_USERNAME:-vagrant}
-
 echo "==> Cleaning up tmp"
 rm -rf /tmp/*
-
-echo "==> Installed packages"
-dpkg --get-selections | grep -v deinstall
-
-# Remove Bash history
-unset HISTFILE
-rm -f /root/.bash_history
-rm -f /home/${SSH_USER}/.bash_history
 
 echo "==> Clearing log files"
 find /var/log -type f -exec truncate --size=0 {} \;
 
-echo '==> Clear out swap and disable until reboot'
+echo "==> Clear out swap and disable until reboot"
 set +e
 swapuuid=$(blkid -o value -l -s UUID -t TYPE=swap)
 case "$?" in
@@ -33,7 +23,7 @@ if [ "x$swapuuid" != "x" ]; then
     mkswap -U $swapuuid $swappart
 fi
 
-# Zero out the free space to save space in the final image
+echo "==>  Zero out the free space"
 dd if=/dev/zero of=/EMPTY bs=1M || echo "dd exit code $? is suppressed"
 rm -f /EMPTY
 sync
