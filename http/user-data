@@ -1,0 +1,44 @@
+#cloud-config
+autoinstall:
+    version: 1
+    early-commands:
+        # Stop ssh for packer
+        - sudo systemctl stop ssh
+    locale: en_US
+    keyboard:
+        layout: en
+        variant: us
+    identity:
+        hostname: localhost
+        username: vagrant
+        password: '$6$/kIBfBPkBIkkGns8$aou6NYjmrhcDKgCNsEpaRgiX5r.eK6iNLW921Q2zsVufYN1Fd0hebExv7L69ZJE4kEm.f1AOe6ii55FPueEbe0'
+    ssh:
+        install-server: yes
+        allow-pw: yes
+    storage:
+        layout:
+            name: direct
+        config:
+            - type: disk
+              id: disk0
+              match:
+                size: largest
+            - type: partition
+              id: boot-partition
+              device: disk0
+              size: 500M
+            - type: partition
+              id: root-partition
+              device: disk0
+              size: -1
+    apt:
+        primary:
+            - arches: [i386, amd64]
+              uri: "http://sk.archive.ubuntu.com/ubuntu/"
+    user-data:
+        disable_root: false
+    late-commands:
+      - sed -i -e 's/^#\?PasswordAuthentication.*/PasswordAuthentication yes/g' /target/etc/ssh/sshd_config
+      - sed -i -e 's/^#\?PermitRootLogin.*/PermitRootLogin yes/g' /target/etc/ssh/sshd_config
+      - curtin in-target --target=/target -- apt-get update
+      - curtin in-target --target=/target -- apt-get upgrade --yes

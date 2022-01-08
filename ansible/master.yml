@@ -1,9 +1,0 @@
----
-# file: vagrant.yml
-
-- hosts: vagrant
-  roles:
-    - 'common'
-    - 'developer'
-    - 'docker'
-#    - 'openshift_node'

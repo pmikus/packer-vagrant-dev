@@ -6,7 +6,7 @@ VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # Variables.
-    vagrant_box_path = "box/"
+    vagrant_box_path = "box"
 
     # Configure cached packages to be shared between instances of the same
     # base box.
@@ -32,10 +32,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     # Whether to check the correct additions version only. This will warn you
     # about version mis-matches, but will not try to install anything.
-    config.vbguest.no_install = true
+    config.vbguest.no_install = false
     # Set auto_update to false, if you do NOT want to check the correct
     # additions version when booting this machine.
-    config.vbguest.auto_update = false
+    config.vbguest.auto_update = true
     # Do NOT download the iso file from a webserver.
     config.vbguest.no_remote = true
     # Whether to reboot the box after GuestAdditions has been installed, but not
@@ -51,8 +51,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # Create a forwarded port mapping which allows access to a specific port
     # within the machine from a port on the host machine. In the example below,
     # accessing "localhost:8080" will access port 80 on the guest machine.
-    config.vm.network "forwarded_port", id: "web", guest: 80, host_ip: "127.0.0.1", host: 8080, protocol: "tcp"
-    config.vm.network "forwarded_port", id: "ssh", guest: 22, host_ip: "127.0.0.1", host: 2222, protocol: "tcp"
+    config.vm.network "forwarded_port", id: "web", guest: 80, host_ip: "127.0.0.1", host: 8081, protocol: "tcp"
+    config.vm.network "forwarded_port", id: "ssh", guest: 22, host_ip: "127.0.0.1", host: 8022, protocol: "tcp"
 
     # Configure testing network interfaces.
     config.vm.network :private_network, auto_config: false, virtualbox__intnet: "link1", nic_type: "82545EM", mac: "080027000001"
@@ -74,23 +74,23 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         ansible.playbook = "ansible/master.yml"
     end
 
-    config.vm.define "ubuntu_focal_desktop" do |flavor|
+    config.vm.define "ubuntu_impish_server" do |flavor|
         # Base box definition, currently using.
-        #  Packer Ubuntu 20.04 VirtualBox image.
-        flavor.vm.box = "#{vagrant_box_path}/virtualbox/ubuntu-focal-desktop-amd64-0.1.box"
+        #  Packer Ubuntu 21.10 VirtualBox image.
+        flavor.vm.box = "#{vagrant_box_path}/packer-ubuntu-server-21.10-virtualbox.box"
         #flavor.vm.box_version = "0.1"
-        flavor.vm.box_check_update = false
+        flavor.vm.box_check_update = true
 
         # Virtualbox machine configuration.
         flavor.vm.provider "virtualbox" do |vb|
-            vb.name = "vagrant_ubuntu_focal_desktop"
+            vb.name = "vagrant_ubuntu_impish_server"
             vb.gui = true
             vb.customize ["modifyvm", :id, "--nicpromisc2", "allow-all"]
             vb.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
             vb.customize ["modifyvm", :id, "--nicpromisc4", "allow-all"]
             vb.customize ["modifyvm", :id, "--nicpromisc5", "allow-all"]
-            vb.customize ["modifyvm", :id, "--ostype", "Linux_64"]
-            vb.customize ["modifyvm", :id, "--memory", 8196]
+            vb.customize ["modifyvm", :id, "--ostype", "Ubuntu_64"]
+            vb.customize ["modifyvm", :id, "--memory", 8192]
             vb.customize ["modifyvm", :id, "--cpus", 4]
             vb.customize ["modifyvm", :id, "--vram", 256]
             vb.customize ["modifyvm", :id, "--ioapic", "on"]
