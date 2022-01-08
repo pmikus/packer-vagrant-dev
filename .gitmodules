@@ -1,0 +1,3 @@
+[submodule "ansible-playbook-vagrant"]
+	path = ansible-playbook-vagrant
+	url = https://github.com/pmikus/ansible-playbook-vagrant
