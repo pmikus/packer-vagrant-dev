@@ -1,3 +1,8 @@
+locals {
+  buildtime = formatdate("YYYY-MM-DD hh:mm ZZZ", timestamp())
+  name      = "${var.guest_os_vendor}-${var.guest_os_member}-${var.guest_os_version}"
+}
+
 variable "audio_controller" {
   type        = string
   description = "The audio controller type to be used."
@@ -91,7 +96,7 @@ variable "headless" {
 variable "http_directory" {
   type        = string
   description = "Path to a directory to serve using an HTTP server."
-  default     = "../../http"
+  default     = "http"
 }
 
 variable "iso_url" {
@@ -164,7 +169,7 @@ variable "template" {
   default     = ""
 }
 
-source "virtualbox-iso" "ubuntu-impish-amd64" {
+source "virtualbox-iso" "base-ubuntu-amd64" {
   audio_controller = var.audio_controller
   boot_command        = [
     "c",
@@ -203,21 +208,16 @@ source "virtualbox-iso" "ubuntu-impish-amd64" {
   vm_name              = "${local.name}"
 }
 
-locals {
-  buildtime = formatdate("YYYY-MM-DD hh:mm ZZZ", timestamp())
-  name      = "${var.guest_os_vendor}-${var.guest_os_member}-${var.guest_os_version}"
-}
-
 build {
   name        = "ubuntu"
   description = <<EOF
 This build creates images for :
-* Ubuntu 21.10
+* ${local.name}
 For the following builders :
 * virtualbox-iso
 EOF
   sources = [
-    "source.virtualbox-iso.base-amd64"
+    "source.virtualbox-iso.base-ubuntu-amd64"
   ]
   post-processor "vagrant" {
     keep_input_artifact = true

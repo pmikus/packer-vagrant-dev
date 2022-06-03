@@ -51,8 +51,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # Create a forwarded port mapping which allows access to a specific port
     # within the machine from a port on the host machine. In the example below,
     # accessing "localhost:8080" will access port 80 on the guest machine.
-    config.vm.network "forwarded_port", id: "web", guest: 80, host_ip: "127.0.0.1", host: 8081, protocol: "tcp"
-    config.vm.network "forwarded_port", id: "ssh", guest: 22, host_ip: "127.0.0.1", host: 8022, protocol: "tcp"
+    #config.vm.network "forwarded_port", id: "web", guest: 8080, host_ip: "127.0.0.1", host: 8080, protocol: "tcp"
+    #config.vm.network "forwarded_port", id: "ssh", guest: 22, host_ip: "127.0.0.1", host: 8022, protocol: "tcp"
+    #config.vm.network "forwarded_port", id: "dash", guest: 5000, host_ip: "127.0.0.1", host: 5000, protocol: "tcp"
 
     # Configure testing network interfaces.
     config.vm.network :private_network, auto_config: false, virtualbox__intnet: "link1", nic_type: "82545EM", mac: "080027000001"
@@ -64,14 +65,17 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # Puppet, Chef, Shell, Salt, and Docker are also available. Please see the
     # documentation for more information about their specific syntax and use.
     config.vm.provision "ansible_local" do |ansible|
-        ansible.install = false
+        ansible.install = true
         ansible.version = "latest"
         ansible.compatibility_mode = "2.0"
         ansible.become = true
         ansible.verbose = false
         ansible.limit = "all"
-        ansible.inventory_path = "ansible/inventory"
-        ansible.playbook = "ansible/master.yml"
+        ansible.inventory_path = "ansible-playbook-vagrant/inventory"
+        ansible.playbook = "ansible-playbook-vagrant/main.yaml"
+        ansible.galaxy_role_file = "ansible-playbook-vagrant/requirements.yaml"
+        ansible.galaxy_roles_path = "/etc/ansible/roles"
+        ansible.galaxy_command = "sudo ansible-galaxy install --role-file=%{role_file} --roles-path=%{roles_path} --force"
     end
 
     config.vm.define "ubuntu_impish_server" do |flavor|
@@ -91,6 +95,33 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
             vb.customize ["modifyvm", :id, "--nicpromisc5", "allow-all"]
             vb.customize ["modifyvm", :id, "--ostype", "Ubuntu_64"]
             vb.customize ["modifyvm", :id, "--memory", 8192]
+            vb.customize ["modifyvm", :id, "--cpus", 4]
+            vb.customize ["modifyvm", :id, "--vram", 256]
+            vb.customize ["modifyvm", :id, "--ioapic", "on"]
+            vb.customize ["modifyvm", :id, "--rtcuseutc", "on"]
+            vb.customize ["modifyvm", :id, "--clipboard", "bidirectional"]
+            vb.customize ["modifyvm", :id, "--draganddrop", "bidirectional"]
+            vb.customize ["modifyvm", :id, "--usb", "on"]
+        end
+    end
+
+    config.vm.define "ubuntu_jammy_server" do |flavor|
+        # Base box definition, currently using.
+        #  Packer Ubuntu 22.04 VirtualBox image.
+        flavor.vm.box = "#{vagrant_box_path}/packer-ubuntu-server-22.04-virtualbox.box"
+        #flavor.vm.box_version = "0.1"
+        flavor.vm.box_check_update = true
+
+        # Virtualbox machine configuration.
+        flavor.vm.provider "virtualbox" do |vb|
+            vb.name = "vagrant_ubuntu_jammy_server"
+            vb.gui = true
+            vb.customize ["modifyvm", :id, "--nicpromisc2", "allow-all"]
+            vb.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
+            vb.customize ["modifyvm", :id, "--nicpromisc4", "allow-all"]
+            vb.customize ["modifyvm", :id, "--nicpromisc5", "allow-all"]
+            vb.customize ["modifyvm", :id, "--ostype", "Ubuntu_64"]
+            vb.customize ["modifyvm", :id, "--memory", 4096]
             vb.customize ["modifyvm", :id, "--cpus", 4]
             vb.customize ["modifyvm", :id, "--vram", 256]
             vb.customize ["modifyvm", :id, "--ioapic", "on"]
