@@ -4,9 +4,11 @@ name: Packer CI
 'on':
   # Triggers the workflow on push or pull request events but only for the master branch
   push:
-    branches: [master]
+    branches: 
+    - master
   pull_request:
-    branches: [master]
+    branches:
+    - master
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -22,15 +24,14 @@ jobs:
         uses: hashicorp/packer-github-actions@v0.2.0
         with:
           command: fmt
-          target: .
-          working_directory: .
+          arguments: "-check"
+          target: base_ubuntu_amd64.pkr.hcl
       # validate templates
       - name: Validate Template
         uses: hashicorp/packer-github-actions@v0.2.0
         with:
           command: validate
-          target: .
-          working_directory: .
+          target: base_ubuntu_amd64.pkr.hcl
       # build artifact
       - name: Build Artifact
         uses: hashicorp/packer-github-actions@v0.2.0
@@ -38,6 +39,5 @@ jobs:
           command: build
           arguments: "-color=false -on-error=abort"
           target: base_ubuntu_amd64.pkr.hcl
-          working_directory: .
         env:
           PACKER_LOG: 1
