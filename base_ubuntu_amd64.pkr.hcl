@@ -210,12 +210,12 @@ source "virtualbox-iso" "base-ubuntu-amd64" {
 
 build {
   name        = "ubuntu"
-  description = <<EOF
-This build creates images for :
-* ${local.name}
-For the following builders :
-* virtualbox-iso
-EOF
+#  description = <<EOF
+#This build creates images for :
+#* ${local.name}
+#For the following builders :
+#* virtualbox-iso
+#EOF
   sources = [
     "source.virtualbox-iso.base-ubuntu-amd64"
   ]
